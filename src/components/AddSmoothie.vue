@@ -41,24 +41,22 @@ export default {
     }
   },
   methods: {
-      AddSmoothie() {
-          if (this.title){
-              this.feedback = null
-              // Create Slug
+    AddSmoothie() {
+        if (this.title){
+            this.feedback = null
+            // Create Slug
               this.slug = slugify(this.title, {
                   replacement: '-',
                   remove: /[$*_+~.()'"!\-:@]/g,
                   lower: true
-              })
-              db.collection('smoothies').add({
+            })
+            let newSmoothie = {
                   title: this.title, 
                   ingredients: this.ingredients,
                   slug: this.slug
-              }).then(() => {
-                this.$router.push({ name: 'Index' })
-              }).catch(err => {
-                  console.log(err);
-              })
+            }
+            this.$store.dispatch('addNewSmoothie', newSmoothie)  
+            this.$router.push({ name: 'Index' })
           } else {
               this.feedback = 'You must enter a smoothie title'
           }

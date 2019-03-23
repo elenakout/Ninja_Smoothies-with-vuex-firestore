@@ -1,6 +1,6 @@
 <template>
   <div class="index container">
-      <div class="card" v-for="smoothie in smoothies" :key="smoothie.id">
+      <div class="card" v-for="smoothie in getSmoothies" :key="smoothie.id">
           <div class="card-content">
               <i class="material-icons delete" @click="deleteSmoothie(smoothie.id)">delete</i>
               <h2 class="indigo-text">{{ smoothie.title }}</h2>
@@ -22,52 +22,14 @@
 
 <script>
 import db from '@/firebase/init'
+import { mapGetters, mapActions } from 'vuex'
 export default {
-  name: 'Index',
-  data () {
-    return {
-        smoothies: []
-    }
-  },
-  methods: {
-      deleteSmoothie(id) {
-          // delete doc from firestore
-          db.collection('smoothies').doc(id).delete()
-          .then(() => {
-                this.smoothies = this.smoothies.filter(smoothie => {
-              return smoothie.id != id
-          })
-          })       
-      }
-  },
-  created () {
-      // fetch data from firestore
-    //   db.collection('smoothies').get()
-    //   .then(snapshot => {
-    //       snapshot.forEach(doc => {
-    //          this.smoothies.push({
-    //              ...doc.data(),
-    //              id: doc.id
-    //          }) 
-    //       })
-    //   })
-    //   .catch(err => {
-    //       console.log(err);
-    //   })
-
-      // realtime hook
-      db.collection('smoothies').onSnapshot(res => {
-          const changes = res.docChanges();
-
-          changes.forEach(change => {
-              if (change.type === 'added'){
-              this.smoothies.push({
-                  ...change.doc.data(),
-                  id: change.doc.id
-              })
-            }
-          })
-      })
+    name: 'Index',
+    computed: {
+        ...mapGetters(['getSmoothies'])
+    },
+    methods: {
+        ...mapActions(['deleteSmoothie'])
   }
 }
 </script>
