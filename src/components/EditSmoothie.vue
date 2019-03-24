@@ -1,14 +1,14 @@
 <template>
-  <div v-if="smoothie" class="edit-smoothie container">
-      <h2 >Edit {{ smoothie.title }} Smoothie </h2>
+  <div v-if="getSmoothie" class="edit-smoothie container">
+      <h2 >Edit {{ getSmoothie.title }} Smoothie </h2>
       <form  @submit.prevent="EditSmoothie">
             <div class="field title">
                 <label for="title">Smoothie Title:</label>
-                <input type="text" name="title" v-model="smoothie.title">
+                <input type="text" name="title" v-model="getSmoothie.title">
             </div>
-            <div v-for="(ing, index) in smoothie.ingredients" :key='index' class="field">
+            <div v-for="(ing, index) in getSmoothie.ingredients" :key='index' class="field">
                 <label for="ingradient">Ingredients:</label>
-                <input type="text" name="ingredient" v-model="smoothie.ingredients[index] "> 
+                <input type="text" name="ingredient" v-model="getSmoothie.ingredients[index] "> 
                 <i class="material-icons delete" @click="deleteIng(ing)">delete</i>
             </div>
             <div class="field add-ingredient">
@@ -24,43 +24,42 @@
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex'
 import db from "@/firebase/init"
 import slugify from 'slugify'
 export default {
   name: "EditSmoothie",
+  created() {
+    this.$store.dispatch('getOneSmoothie', this.$route.params.smoothie_slug)
+  },
   data() {
     return {
-      smoothie: null,
       another: null,
       feedback: null
-    };
+    }
+  },
+  computed: {
+    ...mapGetters(['getSmoothie'])
   },
   methods: {
     EditSmoothie() {
-      if (this.smoothie.title){
+      if (this.getSmoothie.title){
               this.feedback = null
               // Create Slug
-              this.smoothie.slug = slugify(this.smoothie.title, {
+              this.getSmoothie.slug = slugify(this.getSmoothie.title, {
                   replacement: '-',
                   remove: /[$*_+~.()'"!\-:@]/g,
                   lower: true
               })
-              db.collection('smoothies').doc(this.smoothie.id).update({
-                  title: this.smoothie.title, 
-                  ingredients: this.smoothie.ingredients,
-                  slug: this.smoothie.slug
-              }).then(() => {
-                this.$router.push({ name: 'Index' })
-              }).catch(err => {
-                  console.log(err);
-              })
+              this.$store.dispatch('editSmoothie', this.getSmoothie)
+              this.$router.push({ name: 'Index' })
           } else {
               this.feedback = 'You must enter a smoothie title'
           }
     },
     addIng() {
       if (this.another) {
-        this.smoothie.ingredients.push(this.another);
+        this.getSmoothie.ingredients.push(this.another);
         this.another = null;
         this.feedback = null;
       } else {
@@ -68,25 +67,13 @@ export default {
       }
     },
     deleteIng(ing) {
-      this.smoothie.ingredients = this.smoothie.ingredients.filter(ingred => {
+      this.getSmoothie.ingredients = this.getSmoothie.ingredients.filter(ingred => {
         return ingred != ing;
       });
     }
   },
-  created() {
-    let ref = db
-      .collection("smoothies")
-      .where("slug", "==", this.$route.params.smoothie_slug);
-    ref.get().then(snapshot => {
-      snapshot.forEach(doc => {
-        this.smoothie = {
-          ...doc.data(),
-          id: doc.id
-        };
-      });
-    });
-  }
-};
+    
+}
 </script>
 
 <style>

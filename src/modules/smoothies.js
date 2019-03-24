@@ -1,12 +1,16 @@
 import db from '@/firebase/init'
 
 const state = {
-    smoothies: []
+    smoothies: [],
+    smoothie: null
 }
 
 const getters = {
     getSmoothies (state) {
         return state.smoothies
+    },
+    getSmoothie(state) {
+        return state.smoothie
     }
 }
 
@@ -18,6 +22,21 @@ const mutations = {
         state.smoothies = state.smoothies.filter(smoothie => {
             return smoothie.id != id
         })
+    },
+    setSmoothie (state, fsmoothie) {
+        state.smoothie = fsmoothie
+    },
+    editLocSmoothie (state, dbSmoothie){
+        // emotions.forEach( emotion => console.log(emotion) );
+        state.smoothies.forEach(smoothie => {
+            if(smoothie.id === dbSmoothie.id) {
+                smoothie.title = dbSmoothie.title
+                smoothie.ingredients = dbSmoothie.ingredients
+                smoothie.slug = dbSmoothie.slug
+                
+            }
+        })
+
     }
 }
 
@@ -63,8 +82,31 @@ const actions = {
             commit('deleteSmoothie', id)
         })
     },
-    editSmoothie({ commit }, id){
-        
+    getOneSmoothie({commit}, slug){
+        let ref = db
+      .collection("smoothies")
+      .where("slug", "==", slug);
+    ref.get().then(snapshot => {
+      snapshot.forEach(doc => {
+      let  findSmoothie = {
+          ...doc.data(),
+          id: doc.id
+        }
+        commit('setSmoothie', findSmoothie)
+      })
+    })
+  
+    },
+    editSmoothie({ commit }, editSmoothie){
+        db.collection('smoothies').doc(editSmoothie.id).update({
+            title: editSmoothie.title, 
+            ingredients: editSmoothie.ingredients,
+            slug: editSmoothie.slug
+        }).then(() => {
+           commit('editLocSmoothie', editSmoothie)
+        }).catch(err => {
+            console.log(err);
+        })
     }
 }
 

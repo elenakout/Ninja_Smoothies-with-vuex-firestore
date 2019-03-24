@@ -42,3 +42,26 @@ this.$router.push({ name: 'Index' })
 /   created () {
 //     this.$store.dispatch('fetchSmoothiesFromDB')
 //   }
+
+computed: {
+    meetup() {
+      return this.$store.getters.loadedMeetup(this.$route.params.id)
+    }
+
+loadedMeetup(state) {
+    return meetupId => {
+      return state.loadedMeetups.find(meetup => {
+        return meetup.id === meetupId;
+      });
+    };
+  },
+
+  db.collection('smoothies').doc(this.smoothie.id).update({
+                  title: this.smoothie.title, 
+                  ingredients: this.smoothie.ingredients,
+                  slug: this.smoothie.slug
+              }).then(() => {
+                this.$router.push({ name: 'Index' })
+              }).catch(err => {
+                  console.log(err);
+              })
