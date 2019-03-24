@@ -21,7 +21,6 @@
 </template>
 
 <script>
-import db from '@/firebase/init'
 import { mapGetters, mapActions } from 'vuex'
 export default {
     name: 'Index',

@@ -24,8 +24,7 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
-import db from "@/firebase/init"
+import { mapGetters } from 'vuex'
 import slugify from 'slugify'
 export default {
   name: "EditSmoothie",
