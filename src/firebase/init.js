@@ -12,7 +12,7 @@ var config = {
     
   };
   const firebaseApp = firebase.initializeApp(config);
-  
+ 
 
   // export firestore database
   export default firebaseApp.firestore()
